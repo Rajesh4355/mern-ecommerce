@@ -1,5 +1,6 @@
 const mongoose=require("mongoose")
 const {Schema}=mongoose
+const {createModel}=require("../database/memoryModel")
 
 const otpSchema=new Schema({
     user:{
@@ -19,4 +20,4 @@ const otpSchema=new Schema({
 
 
 
-module.exports=mongoose.model("OTP",otpSchema)
+module.exports=createModel("OTP",otpSchema)

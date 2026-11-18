@@ -1,5 +1,6 @@
 const mongoose=require("mongoose")
 const {Schema}=mongoose
+const {createModel}=require("../database/memoryModel")
 
 const passwordResetTokenSchema=new Schema({
     user:{
@@ -19,4 +20,4 @@ const passwordResetTokenSchema=new Schema({
 
 
 
-module.exports=mongoose.model("PasswordResetToken",passwordResetTokenSchema)
+module.exports=createModel("PasswordResetToken",passwordResetTokenSchema)

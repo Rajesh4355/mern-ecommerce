@@ -90,6 +90,7 @@ export const Reviews = ({productId,averageRating}) => {
 
 
     const handleAddReview=(data)=>{
+        if(!loggedInUser?._id) return
         const review={...data,rating:value,user:loggedInUser._id,product:productId}
         dispatch(createReviewAsync(review))
         setWriteReview(false)
@@ -137,7 +138,7 @@ export const Reviews = ({productId,averageRating}) => {
 
             {/* reviews mapping */}
             <Stack rowGap={2} >
-                {reviews?.map((review)=>(<ReviewItem key={review._id} id={review._id} userid={review.user._id} comment={review.comment} createdAt={review.createdAt} rating={review.rating} username={review.user.name} />))}
+                {reviews?.map((review)=>(<ReviewItem key={review._id} id={review._id} userid={review.user?._id} comment={review.comment} createdAt={review.createdAt} rating={review.rating} username={review.user?.name || 'User'} />))}
             </Stack>
 
             

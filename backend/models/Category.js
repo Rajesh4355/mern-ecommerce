@@ -1,5 +1,6 @@
 const mongoose=require("mongoose")
 const {Schema}=mongoose
+const {createModel}=require("../database/memoryModel")
 
 
 const categorySchema=new Schema({
@@ -9,4 +10,4 @@ const categorySchema=new Schema({
     }
 })
 
-module.exports=mongoose.model("Category",categorySchema)
+module.exports=createModel("Category",categorySchema)

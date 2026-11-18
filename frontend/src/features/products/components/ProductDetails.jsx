@@ -54,8 +54,8 @@ export const ProductDetails = () => {
 
 
 
-    const isProductAlreadyInCart=cartItems.some((item)=>item.product._id===id)
-    const isProductAlreadyinWishlist=wishlistItems.some((item)=>item.product._id===id)
+    const isProductAlreadyInCart=cartItems.some((item)=>item?.product?._id===id)
+    const isProductAlreadyinWishlist=wishlistItems.some((item)=>item?.product?._id===id)
 
     const productFetchStatus=useSelector(selectProductFetchStatus)
     const reviewFetchStatus=useSelector(selectReviewFetchStatus)
@@ -135,6 +135,7 @@ export const ProductDetails = () => {
     },[])
 
     const handleAddToCart=()=>{
+        if(!loggedInUser?._id) return
         const item={user:loggedInUser._id,product:id,quantity}
         dispatch(addToCartAsync(item))
         setQuantity(1)
@@ -147,7 +148,7 @@ export const ProductDetails = () => {
     }
     
     const handleIncreaseQty=()=>{
-        if(quantity<20 && quantity<product.stockQuantity){
+        if(quantity<20 && quantity<(product?.stockQuantity || 0)){
             setQuantity(quantity+1)
         }
     }
@@ -163,13 +164,15 @@ export const ProductDetails = () => {
         }
 
         else if(!e.target.checked){
-            const index=wishlistItems.findIndex((item)=>item.product._id===id)
-            dispatch(deleteWishlistItemByIdAsync(wishlistItems[index]._id));
+            const index=wishlistItems.findIndex((item)=>item?.product?._id===id)
+            if(index!==-1 && wishlistItems[index]?._id){
+                dispatch(deleteWishlistItemByIdAsync(wishlistItems[index]._id));
+            }
         }
     }
 
     const [activeStep, setActiveStep] = React.useState(0);
-    const maxSteps = product?.images.length;
+    const maxSteps = product?.images?.length || 0;
 
     const handleNext = () => {
         setActiveStep((prevActiveStep) => prevActiveStep + 1);

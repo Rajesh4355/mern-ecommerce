@@ -1,5 +1,6 @@
 const mongoose=require('mongoose')
 const {Schema}=mongoose
+const {createModel}=require('../database/memoryModel')
 
 const addressSchema = new Schema({
     user:{
@@ -37,4 +38,4 @@ const addressSchema = new Schema({
     },
   });
 
-module.exports=mongoose.model('Address',addressSchema)
+module.exports=createModel('Address',addressSchema)

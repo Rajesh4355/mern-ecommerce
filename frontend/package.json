@@ -27,8 +27,9 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "set GENERATE_SOURCEMAP=false&&react-scripts build",
+    "start": "PORT=3000 HOST=0.0.0.0 react-scripts start",
+    "dev": "PORT=3000 HOST=0.0.0.0 react-scripts start",
+    "build": "GENERATE_SOURCEMAP=false react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
@@ -51,6 +52,7 @@
     ]
   },
   "devDependencies": {
-    "@babel/plugin-proposal-private-property-in-object": "^7.21.11"
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+    "ajv": "^8.12.0"
   }
 }

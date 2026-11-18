@@ -10,7 +10,7 @@ import {motion} from 'framer-motion'
 
 export const Cart = ({checkout}) => {
     const items=useSelector(selectCartItems)
-    const subtotal=items.reduce((acc,item)=>item.product.price*item.quantity+acc,0)
+    const subtotal=items.reduce((acc,item)=>(item?.product?.price || 0)*item.quantity+acc,0)
     const totalItems=items.reduce((acc,item)=>acc+item.quantity,0)
     const navigate=useNavigate()
     const theme=useTheme()
@@ -55,8 +55,8 @@ export const Cart = ({checkout}) => {
             {/* cart items */}
             <Stack rowGap={2}>
             {
-                items && items.map((item)=>(
-                    <CartItem key={item._id} id={item._id} title={item.product.title} brand={item.product.brand.name} category={item.product.category.name} price={item.product.price} quantity={item.quantity} thumbnail={item.product.thumbnail} stockQuantity={item.product.stockQuantity} productId={item.product._id}/>
+                items && items.filter((item)=>item?.product).map((item)=>(
+                    <CartItem key={item._id} id={item._id} title={item.product.title} brand={item.product.brand?.name || ''} category={item.product.category?.name || ''} price={item.product.price} quantity={item.quantity} thumbnail={item.product.thumbnail} stockQuantity={item.product.stockQuantity} productId={item.product._id}/>
                 ))
             }
             </Stack>

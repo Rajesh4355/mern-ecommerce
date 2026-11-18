@@ -102,6 +102,7 @@ export const OtpVerfication = () => {
                             </Stack>
                        </Stack>
                         <LoadingButton loading={otpVerificationStatus==='pending'}  type='submit' fullWidth variant='contained'>Verify</LoadingButton>
+                        <Button onClick={handleSendOtp} disabled={resendOtpStatus==='pending'} size='small' variant='text'>Resend OTP</Button>
                     </Stack>
                 ):
                 <>

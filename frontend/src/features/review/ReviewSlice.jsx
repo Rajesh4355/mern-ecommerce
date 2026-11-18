@@ -81,8 +81,9 @@ const reviewSlice=createSlice({
             })
             .addCase(updateReviewByIdAsync.fulfilled,(state,action)=>{
                 state.reviewUpdateStatus='fulfilled'
+                if(!action.payload?._id) return
                 const index=state.reviews.findIndex((review)=>review._id===action.payload._id)
-                state.reviews[index]=action.payload
+                if(index!==-1) state.reviews[index]=action.payload
             })
             .addCase(updateReviewByIdAsync.rejected,(state,action)=>{
                 state.reviewUpdateStatus='rejected'
@@ -94,6 +95,7 @@ const reviewSlice=createSlice({
             })
             .addCase(deleteReviewByIdAsync.fulfilled,(state,action)=>{
                 state.reviewDeleteStatus='fulfilled'
+                if(!action.payload?._id) return
                 state.reviews=state.reviews.filter((review)=>review._id!==action.payload._id)
             })
             .addCase(deleteReviewByIdAsync.rejected,(state,action)=>{

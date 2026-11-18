@@ -7,6 +7,36 @@ const { sanitizeUser } = require("../utils/SanitizeUser");
 const { generateToken } = require("../utils/GenerateToken");
 const PasswordResetToken = require("../models/PasswordResetToken");
 
+const parseOtpTtlMs = (raw) => {
+    const fallback = 5 * 60 * 1000; // 5 minutes
+    if (!raw) return fallback;
+    const str = String(raw).trim().toLowerCase();
+    const match = str.match(/^(\d+(?:\.\d+)?)\s*(ms|s|m|h|d)?$/);
+    if (!match) return fallback;
+    const num = parseFloat(match[1]);
+    const unit = match[2] || 'ms';
+    if (!Number.isFinite(num) || num <= 0) return fallback;
+    const multipliers = { ms: 1, s: 1000, m: 60000, h: 3600000, d: 86400000 };
+    const ms = Math.round(num * (multipliers[unit] || 1));
+    return Math.max(ms, fallback);
+};
+
+const getCookieOptions = (req, maxAgeMs) => {
+    const isSecure = Boolean(
+        process.env.PRODUCTION === 'true' ||
+        req.secure ||
+        req.headers['x-forwarded-proto'] === 'https'
+    );
+    const parsedDays = parseInt(process.env.COOKIE_EXPIRATION_DAYS || '30', 10);
+    const days = Number.isFinite(parsedDays) && parsedDays > 0 ? parsedDays : 30;
+    return {
+        sameSite: isSecure ? "None" : "Lax",
+        maxAge: maxAgeMs !== undefined ? maxAgeMs : days * 24 * 60 * 60 * 1000,
+        httpOnly: true,
+        secure: isSecure
+    };
+};
+
 exports.signup=async(req,res)=>{
     try {
         const existingUser=await User.findOne({email:req.body.email})
@@ -31,12 +61,7 @@ exports.signup=async(req,res)=>{
         const token=generateToken(secureInfo)
 
         // sending jwt token in the response cookies
-        res.cookie('token',token,{
-            sameSite:process.env.PRODUCTION==='true'?"None":'Lax',
-            maxAge:new Date(Date.now() + (parseInt(process.env.COOKIE_EXPIRATION_DAYS * 24 * 60 * 60 * 1000))),
-            httpOnly:true,
-            secure:process.env.PRODUCTION==='true'?true:false
-        })
+        res.cookie('token',token,getCookieOptions(req))
 
         res.status(201).json(sanitizeUser(createdUser))
 
@@ -61,12 +86,7 @@ exports.login=async(req,res)=>{
             const token=generateToken(secureInfo)
 
             // sending jwt token in the response cookies
-            res.cookie('token',token,{
-                sameSite:process.env.PRODUCTION==='true'?"None":'Lax',
-                maxAge:new Date(Date.now() + (parseInt(process.env.COOKIE_EXPIRATION_DAYS * 24 * 60 * 60 * 1000))),
-                httpOnly:true,
-                secure:process.env.PRODUCTION==='true'?true:false
-            })
+            res.cookie('token',token,getCookieOptions(req))
             return res.status(200).json(sanitizeUser(existingUser))
         }
 
@@ -106,6 +126,9 @@ exports.verifyOtp=async(req,res)=>{
         if(isOtpExisting && (await bcrypt.compare(req.body.otp,isOtpExisting.otp))){
             await Otp.findByIdAndDelete(isOtpExisting._id)
             const verifiedUser=await User.findByIdAndUpdate(isValidUserId._id,{isVerified:true},{new:true})
+            if(!verifiedUser){
+                return res.status(404).json({message:'User not found'})
+            }
             return res.status(200).json(sanitizeUser(verifiedUser))
         }
 
@@ -133,12 +156,13 @@ exports.resendOtp=async(req,res)=>{
         const otp=generateOTP()
         const hashedOtp=await bcrypt.hash(otp,10)
 
-        const newOtp=new Otp({user:req.body.user,otp:hashedOtp,expiresAt:Date.now()+parseInt(process.env.OTP_EXPIRATION_TIME)})
+        const otpTtl = parseOtpTtlMs(process.env.OTP_EXPIRATION_TIME)
+        const newOtp=new Otp({user:req.body.user,otp:hashedOtp,expiresAt:new Date(Date.now()+otpTtl)})
         await newOtp.save()
 
-        await sendMail(existingUser.email,`OTP Verification for Your MERN-AUTH-REDUX-TOOLKIT Account`,`Your One-Time Password (OTP) for account verification is: <b>${otp}</b>.</br>Do not share this OTP with anyone for security reasons`)
+        const mailResult = await sendMail(existingUser.email,`OTP Verification for Your MERN-AUTH-REDUX-TOOLKIT Account`,`Your One-Time Password (OTP) for account verification is: <b>${otp}</b>.</br>Do not share this OTP with anyone for security reasons`)
 
-        res.status(201).json({'message':"OTP sent"})
+        res.status(201).json({'message': mailResult?.delivered ? "OTP sent" : `OTP sent (Demo OTP: ${otp})`})
     } catch (error) {
         res.status(500).json({'message':"Some error occured while resending otp, please try again later"})
         console.log(error);
@@ -165,15 +189,20 @@ exports.forgotPassword=async(req,res)=>{
         const hashedToken=await bcrypt.hash(passwordResetToken,10)
 
         // saves hashed token in passwordResetToken collection
-        newToken=new PasswordResetToken({user:isExistingUser._id,token:hashedToken,expiresAt:Date.now() + parseInt(process.env.OTP_EXPIRATION_TIME)})
+        const otpTtl = parseOtpTtlMs(process.env.OTP_EXPIRATION_TIME)
+        newToken=new PasswordResetToken({user:isExistingUser._id,token:hashedToken,expiresAt:new Date(Date.now() + otpTtl)})
         await newToken.save()
+
+        const origin = (process.env.ORIGIN && !process.env.ORIGIN.includes('your-frontend-domain'))
+            ? process.env.ORIGIN
+            : `${req.protocol}://${req.get('host')}`
 
         // sends the password reset link to the user's mail
         await sendMail(isExistingUser.email,'Password Reset Link for Your MERN-AUTH-REDUX-TOOLKIT Account',`<p>Dear ${isExistingUser.name},
 
         We received a request to reset the password for your MERN-AUTH-REDUX-TOOLKIT account. If you initiated this request, please use the following link to reset your password:</p>
         
-        <p><a href=${process.env.ORIGIN}/reset-password/${isExistingUser._id}/${passwordResetToken} target="_blank">Reset Password</a></p>
+        <p><a href=${origin}/reset-password/${isExistingUser._id}/${passwordResetToken} target="_blank">Reset Password</a></p>
         
         <p>This link is valid for a limited time. If you did not request a password reset, please ignore this email. Your account security is important to us.
         
@@ -234,12 +263,7 @@ exports.resetPassword=async(req,res)=>{
 
 exports.logout=async(req,res)=>{
     try {
-        res.cookie('token',{
-            maxAge:0,
-            sameSite:process.env.PRODUCTION==='true'?"None":'Lax',
-            httpOnly:true,
-            secure:process.env.PRODUCTION==='true'?true:false
-        })
+        res.cookie('token','',getCookieOptions(req, 0))
         res.status(200).json({message:'Logout successful'})
     } catch (error) {
         console.log(error);
@@ -248,8 +272,12 @@ exports.logout=async(req,res)=>{
 
 exports.checkAuth=async(req,res)=>{
     try {
-        if(req.user){
+        if(req.user && req.user._id){
             const user=await User.findById(req.user._id)
+            if(!user){
+                res.clearCookie('token')
+                return res.sendStatus(401)
+            }
             return res.status(200).json(sanitizeUser(user))
         }
         res.sendStatus(401)

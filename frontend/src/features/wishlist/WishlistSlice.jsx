@@ -79,8 +79,9 @@ const wishlistSlice=createSlice({
             })
             .addCase(updateWishlistItemByIdAsync.fulfilled,(state,action)=>{
                 state.wishlistItemUpdateStatus='fulfilled'
+                if(!action.payload?._id) return
                 const index=state.items.findIndex((item)=>item._id===action.payload._id)
-                state.items[index]=action.payload
+                if(index!==-1) state.items[index]=action.payload
             })
             .addCase(updateWishlistItemByIdAsync.rejected,(state,action)=>{
                 state.wishlistItemUpdateStatus='rejected'
@@ -92,6 +93,7 @@ const wishlistSlice=createSlice({
             })
             .addCase(deleteWishlistItemByIdAsync.fulfilled,(state,action)=>{
                 state.wishlistItemDeleteStatus='fulfilled'
+                if(!action.payload?._id) return
                 state.items=state.items.filter((item)=>item._id!==action.payload._id)
             })
             .addCase(deleteWishlistItemByIdAsync.rejected,(state,action)=>{

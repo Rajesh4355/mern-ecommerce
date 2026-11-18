@@ -1,5 +1,6 @@
 const mongoose=require('mongoose')
 const {Schema}=mongoose
+const {createModel}=require("../database/memoryModel")
 
 const wishlistSchema=new Schema({
     user:{
@@ -17,4 +18,4 @@ const wishlistSchema=new Schema({
     }
 },{timestamps:true,versionKey:false})
 
-module.exports=mongoose.model("Wishlist",wishlistSchema)
+module.exports=createModel("Wishlist",wishlistSchema)

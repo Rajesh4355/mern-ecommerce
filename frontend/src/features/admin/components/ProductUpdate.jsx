@@ -48,6 +48,7 @@ export const ProductUpdate = () => {
     },[])
 
     const handleProductUpdate=(data)=>{
+        if(!selectedProduct?._id) return
         const productUpdate={...data,_id:selectedProduct._id,images:[data?.image0,data?.image1,data?.image2,data?.image3]}
         delete productUpdate?.image0
         delete productUpdate?.image1
@@ -77,11 +78,11 @@ export const ProductUpdate = () => {
 
                     <FormControl fullWidth>
                         <InputLabel id="brand-selection">Brand</InputLabel>
-                        <Select defaultValue={selectedProduct.brand._id} {...register("brand",{required:"Brand is required"})} labelId="brand-selection" label="Brand">
+                        <Select defaultValue={selectedProduct.brand?._id || ''} {...register("brand",{required:"Brand is required"})} labelId="brand-selection" label="Brand">
                             
                             {
                                 brands.map((brand)=>(
-                                    <MenuItem value={brand._id}>{brand.name}</MenuItem>
+                                    <MenuItem key={brand._id} value={brand._id}>{brand.name}</MenuItem>
                                 ))
                             }
 
@@ -91,11 +92,11 @@ export const ProductUpdate = () => {
 
                     <FormControl fullWidth>
                         <InputLabel id="category-selection">Category</InputLabel>
-                        <Select defaultValue={selectedProduct.category._id} {...register("category",{required:"category is required"})} labelId="category-selection" label="Category">
+                        <Select defaultValue={selectedProduct.category?._id || ''} {...register("category",{required:"category is required"})} labelId="category-selection" label="Category">
                             
                             {
                                 categories.map((category)=>(
-                                    <MenuItem value={category._id}>{category.name}</MenuItem>
+                                    <MenuItem key={category._id} value={category._id}>{category.name}</MenuItem>
                                 ))
                             }
 

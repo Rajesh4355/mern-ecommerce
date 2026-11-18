@@ -78,8 +78,9 @@ const addressSlice=createSlice({
             })
             .addCase(updateAddressByIdAsync.fulfilled,(state,action)=>{
                 state.addressUpdateStatus='fulfilled'
+                if(!action.payload?._id) return
                 const index=state.addresses.findIndex((address)=>address._id===action.payload._id)
-                state.addresses[index]=action.payload
+                if(index!==-1) state.addresses[index]=action.payload
             })
             .addCase(updateAddressByIdAsync.rejected,(state,action)=>{
                 state.addressUpdateStatus='rejected'
@@ -91,6 +92,7 @@ const addressSlice=createSlice({
             })
             .addCase(deleteAddressByIdAsync.fulfilled,(state,action)=>{
                 state.addressDeleteStatus='fulfilled'
+                if(!action.payload?._id) return
                 state.addresses=state.addresses.filter((address)=>address._id!==action.payload._id)
             })
             .addCase(deleteAddressByIdAsync.rejected,(state,action)=>{

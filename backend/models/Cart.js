@@ -1,5 +1,6 @@
 const mongoose=require("mongoose")
 const {Schema}=mongoose
+const {createModel}=require("../database/memoryModel")
 
 const cartSchema=new Schema({
     user:{
@@ -18,4 +19,4 @@ const cartSchema=new Schema({
     }
 },{versionKey:false})
 
-module.exports=mongoose.model("Cart",cartSchema)
+module.exports=createModel("Cart",cartSchema)

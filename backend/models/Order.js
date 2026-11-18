@@ -1,5 +1,6 @@
 const mongoose=require("mongoose")
 const {Schema}=mongoose
+const {createModel}=require("../database/memoryModel")
 
 const orderSchema=new Schema({
     user:{
@@ -35,4 +36,4 @@ const orderSchema=new Schema({
     },
 },{versionKey:false})
 
-module.exports=mongoose.model("Order",orderSchema)
+module.exports=createModel("Order",orderSchema)

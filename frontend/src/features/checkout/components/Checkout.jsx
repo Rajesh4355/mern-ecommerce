@@ -50,11 +50,13 @@ export const Checkout = () => {
     },[currentOrder])
     
     const handleAddAddress=(data)=>{
+        if(!loggedInUser?._id) return
         const address={...data,user:loggedInUser._id}
         dispatch(addAddressAsync(address))
     }
 
     const handleCreateOrder=()=>{
+        if(!loggedInUser?._id) return
         const order={user:loggedInUser._id,item:cartItems,address:selectedAddress,paymentMode:selectedPaymentMethod,total:orderTotal+SHIPPING+TAXES}
         dispatch(createOrderAsync(order))
     }

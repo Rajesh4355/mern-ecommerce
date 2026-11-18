@@ -1,5 +1,6 @@
 const mongoose=require("mongoose")
 const {Schema}=mongoose
+const {createModel}=require("../database/memoryModel")
 
 const userSchema=new Schema({
     name:{
@@ -25,4 +26,4 @@ const userSchema=new Schema({
     }
 })
 
-module.exports=mongoose.model("User",userSchema)
+module.exports=createModel("User",userSchema)

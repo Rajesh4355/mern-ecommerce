@@ -1,0 +1,13 @@
+{
+  "name": "mern-ecommerce",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "postinstall": "npm --prefix backend install --omit=dev --no-audit --no-fund",
+    "build:frontend": "([ -d frontend/node_modules ] || npm --prefix frontend install --legacy-peer-deps --no-audit --no-fund) && npm --prefix frontend run build && rm -rf frontend/node_modules",
+    "build": "([ -d backend/node_modules ] || npm --prefix backend install --omit=dev --no-audit --no-fund) && npm run build:frontend",
+    "start": "node backend/index.js",
+    "dev": "([ -f frontend/build/index.html ] || npm run build) && node backend/index.js",
+    "lint": "echo \"No root lint script configured\""
+  }
+}

@@ -2,6 +2,7 @@ import { Avatar, Button, Paper, Stack, Typography, useTheme ,TextField, useMedia
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { selectUserInfo } from '../UserSlice'
+import { selectLoggedInUser } from '../../auth/AuthSlice'
 import { addAddressAsync, resetAddressAddStatus, resetAddressDeleteStatus, resetAddressUpdateStatus, selectAddressAddStatus, selectAddressDeleteStatus, selectAddressErrors, selectAddressStatus, selectAddressUpdateStatus, selectAddresses } from '../../address/AddressSlice'
 import { Address } from '../../address/components/Address'
 import { useForm } from 'react-hook-form'
@@ -14,6 +15,7 @@ export const UserProfile = () => {
     const {register,handleSubmit,watch,reset,formState: { errors }} = useForm()
     const status=useSelector(selectAddressStatus)
     const userInfo=useSelector(selectUserInfo)
+    const loggedInUser=useSelector(selectLoggedInUser)
     const addresses=useSelector(selectAddresses)
     const theme=useTheme()
     const [addAddress,setAddAddress]=useState(false)
@@ -72,7 +74,9 @@ export const UserProfile = () => {
     },[])
 
     const handleAddAddress=(data)=>{
-        const address={...data,user:userInfo._id}
+        const userId = userInfo?._id || loggedInUser?._id
+        if(!userId) return
+        const address={...data,user:userId}
         dispatch(addAddressAsync(address))
         setAddAddress(false)
         reset()

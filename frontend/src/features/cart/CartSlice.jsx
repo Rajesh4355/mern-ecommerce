@@ -73,8 +73,9 @@ const cartSlice=createSlice({
             })
             .addCase(updateCartItemByIdAsync.fulfilled,(state,action)=>{
                 state.status='fulfilled'
+                if(!action.payload?._id) return
                 const index=state.items.findIndex((item)=>item._id===action.payload._id)
-                state.items[index]=action.payload
+                if(index!==-1) state.items[index]=action.payload
             })
             .addCase(updateCartItemByIdAsync.rejected,(state,action)=>{
                 state.status='rejected'
@@ -86,6 +87,7 @@ const cartSlice=createSlice({
             })
             .addCase(deleteCartItemByIdAsync.fulfilled,(state,action)=>{
                 state.cartItemRemoveStatus='fulfilled'
+                if(!action.payload?._id) return
                 state.items=state.items.filter((item)=>item._id!==action.payload._id)
             })
             .addCase(deleteCartItemByIdAsync.rejected,(state,action)=>{

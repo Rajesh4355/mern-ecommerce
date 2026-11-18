@@ -1,5 +1,6 @@
 const mongoose=require("mongoose")
 const {Schema}=mongoose
+const {createModel}=require("../database/memoryModel")
 
 const productSchema= new Schema({
     title:{
@@ -46,4 +47,4 @@ const productSchema= new Schema({
     }
 },{timestamps:true,versionKey:false})
 
-module.exports=mongoose.model('Product',productSchema)
+module.exports=createModel('Product',productSchema)

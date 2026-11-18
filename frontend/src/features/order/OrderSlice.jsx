@@ -90,8 +90,9 @@ const orderSlice=createSlice({
             })
             .addCase(updateOrderByIdAsync.fulfilled,(state,action)=>{
                 state.orderUpdateStatus='fulfilled'
+                if(!action.payload?._id) return
                 const index=state.orders.findIndex((order)=>order._id===action.payload._id)
-                state.orders[index]=action.payload
+                if(index!==-1) state.orders[index]=action.payload
             })
             .addCase(updateOrderByIdAsync.rejected,(state,action)=>{
                 state.orderUpdateStatus='rejected'

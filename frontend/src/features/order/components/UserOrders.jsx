@@ -66,6 +66,7 @@ export const UserOrders = () => {
 
 
     const handleAddToCart=(product)=>{
+        if(!loggedInUser?._id || !product?._id) return
         const item={user:loggedInUser._id,product:product._id,quantity:1}
         dispatch(addToCartAsync(item))
     }
@@ -155,9 +156,9 @@ export const UserOrders = () => {
                                                         <Typography color={'text.secondary'}>{product.product.description}</Typography>
 
                                                         <Stack mt={2} alignSelf={is480?"flex-start":'flex-end'} flexDirection={'row'} columnGap={2} >
-                                                            <Button size='small' component={Link} to={`/product-details/${product.product._id}`} variant='outlined'>View Product</Button>
+                                                            <Button size='small' component={Link} to={`/product-details/${product?.product?._id}`} variant='outlined'>View Product</Button>
                                                             {
-                                                                cartItems.some((cartItem)=>cartItem.product._id===product.product._id)?
+                                                                cartItems.some((cartItem)=>cartItem?.product?._id===product?.product?._id)?
                                                                 <Button  size='small' variant='contained' component={Link} to={"/cart"}>Already in Cart</Button>
                                                                 :<Button  size='small' variant='contained' onClick={()=>handleAddToCart(product.product)}>Buy Again</Button>
                                                             }
